@@ -1,0 +1,53 @@
+recon_loss_metric: "$torch.nn.L1Loss()"
+contrastive_loss_metric: "$AMPContrastiveLoss(temperature=0.05)"
+
+additional_metric: "$monai.handlers.IgniteMetricHandler(loss_fn=@contrastive_loss_metric,output_transform=contrastive_loss_transform)"
+train_key_metric: "$monai.handlers.IgniteMetricHandler(loss_fn=@recon_loss_metric,output_transform=recon_loss_transform)"
+
+
+train_handlers:
+- _target_: StatsHandler
+  output_transform: "$from_engine(['loss'], first=True)"
+  tag_name: "train_loss"
+- _target_: ValidationHandler
+  epoch_level: True
+  interval: "@val_interval"
+  validator: "@evaluator"
+- _target_: TensorBoardStatsHandler
+  log_dir: "@log_dir"
+  output_transform: "$from_engine(['loss'], first=True)"
+  tag_name: "train_loss"
+- _target_: MLFlowHandler
+  dataset_dict:
+    train: "$@data[0]"
+  dataset_keys: "image"
+  experiment_name: "@mlflow_experiment_name"
+  output_transform: "$mlflow_transform"
+  run_name: "@mlflow_run_name"
+  state_attributes:
+  - "best_metric"
+  - "best_metric_epoch"
+  tag_name: "Train_Loss"
+  tracking_uri: "@tracking_uri"
+- _target_: CheckpointLoader
+  load_path: $@ckpt_dir + '/checkpoint_epoch=35.pt'
+  load_dict:
+    model: "@model"
+    optimizer_state: "@optimizer"
+  
+trainer: 
+  _target_: SupervisedTrainer
+  device: "cuda"
+  max_epochs: "@max_epochs"
+  train_data_loader: "@train_loader"
+  network: "@model"
+  optimizer: "@optimizer"
+  loss_function: "@total_loss"
+  key_train_metric:
+    Reconstruction_Loss: "@train_key_metric"
+  train_handlers: "@train_handlers"
+  additional_metrics:
+    Contrastive_Loss: "@additional_metric"
+  amp: True
+  prepare_batch: "$prepare_batch"
+  iteration_update: "$iteration"

@@ -1,0 +1,51 @@
+plan_transform:
+  _target_: Compose
+  transforms:
+  - _target_: LoadImaged
+    keys: "@image_modalities"
+    ensure_channel_first: True
+
+preprocess_transform:
+  _target_: Compose
+  transforms:
+  - _target_: LoadImaged
+    keys: "@image_modalities"
+  - _target_: LoadImaged
+    keys: "@instance_seg_key"
+  - _target_: EnsureChannelFirstd
+    keys: "@instance_seg_key"
+    channel_dim: "no_channel"
+  - _target_: EnsureChannelFirstd
+    keys: "@image_modalities"
+  - _target_: EnsureTyped
+    dtype: float32
+    keys: "@image_modalities"
+  - _target_: Orientationd
+    axcodes: "@orientation_axes"
+    keys: "@image_modalities"
+  - _target_: Orientationd
+    axcodes: "@orientation_axes"
+    keys: "@instance_seg_key"
+  - _target_: Spacingd
+    keys: "@image_modalities"
+    pixdim: "@spacing"
+  - _target_: Spacingd
+    keys: "@instance_seg_key"
+    pixdim: "@spacing"
+  - _target_: ScaleIntensityd
+    keys: "@image_modalities"
+    channel_wise: True
+  - _target_: ConcatItemsd
+    keys: "@image_modalities"
+    name: "image"
+
+save_preprocess_transforms:
+  _target_: Compose
+  transforms:
+  - _target_: SaveImaged
+    keys: "image"
+    meta_keys: "image_meta_dict"
+    output_dir: "@preprocess_dir"
+    output_postfix: "@image_suffix"
+    output_name_formatter: "$PreprocessNameFormatter('_0000.nii.gz')"
+    resample: False

@@ -1,0 +1,44 @@
+key_val_metric: "$monai.handlers.IgniteMetricHandler(loss_fn=@recon_loss, output_transform=recon_val_loss_transform)"
+
+
+val_handlers:
+- _target_: StatsHandler
+  iteration_log: False
+- _target_: CheckpointSaver
+  save_dir: "@ckpt_dir"
+  save_dict:
+    model: "@model"
+    optimizer_state: "@optimizer"
+  save_interval: 1
+  key_metric_negative_sign: True
+  save_key_metric: True
+  n_saved: 1
+- _target_: TensorBoardStatsHandler
+  log_dir: "@log_dir"
+  iteration_log: False
+- _target_: TensorBoardImageHandler
+  log_dir: "@log_dir"
+  batch_transform: "$tb_batch_transform"
+  output_transform: "$tb_output_transform"
+  max_channels: 2
+- _target_: MLFlowHandler
+  experiment_name: "@mlflow_experiment_name"
+  iteration_log: False
+  output_transform: "$mlflow_transform"
+  run_name: "@mlflow_run_name"
+  state_attributes:
+  - "best_metric"
+  - "best_metric_epoch"
+  tracking_uri: "@tracking_uri"
+
+
+evaluator:
+  _target_: SupervisedEvaluator
+  amp: True
+  device: "@device"
+  network: "@model"
+  key_val_metric:
+    Val_Reconstruction_Loss: "@key_val_metric"
+  prepare_batch: "$prepare_val_batch"
+  val_data_loader: "@val_loader"
+  val_handlers: "@val_handlers"

@@ -1,0 +1,4 @@
+run: 
+- "$@model.to(@device)"
+- "$reload_checkpoint(@trainer, 'latest', @num_train_batches_per_epoch, @ckpt_dir)"
+- "$@trainer.run()"

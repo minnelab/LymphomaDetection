@@ -1,0 +1,34 @@
+decathlon_data_list: ""
+data_dir: ""
+train_workers: 4
+val_workers: 4
+batch_size: 4
+modality_conf:
+  ct:
+    suffix: _0000.nii.gz
+  pet:
+    suffix: _0001.nii.gz
+  instance_seg:
+    suffix: ".nii.gz"
+
+instance_seg_key: "instance_seg"
+
+image_modalities:
+- ct
+- pet
+
+plan_filename: "$@data_dir + '/plan.json'"
+
+
+orientation_axes: "RAS"
+spacing: 
+- 2.03642011
+- 2.03642011
+- 3.0
+
+preprocess_dir: "$@data_dir + '/preprocessed'"
+image_suffix: "image"
+preprocess_file_path: "$@data_dir + '/preprocess.json'"
+
+box_key: "box"
+label_key: "label"

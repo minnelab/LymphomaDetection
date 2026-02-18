@@ -1,0 +1,35 @@
+data_list: "$monai.data.load_decathlon_datalist(@decathlon_data_list, @data_dir)"
+partitioned_dataset: "$monai.data.utils.partition_dataset(data=@data_list, ratios=[0.8, 0.2], shuffle=True)"
+
+
+plan_train_dataset:
+  _target_: CacheDataset
+  data: "$@partitioned_dataset[0]"
+  transform: "@plan_transform"
+  num_workers: "@train_workers"
+  cache_num: "@train_workers"
+  runtime_cache: "processes"
+
+  
+plan_val_dataset:
+  _target_: CacheDataset
+  data: "$@partitioned_dataset[1]"
+  transform: "@plan_transform"
+  num_workers: "@val_workers"
+  cache_num: "@val_workers"
+  runtime_cache: "processes"
+
+
+plan_train_loader:
+  _target_: DataLoader
+  dataset: "@plan_train_dataset"
+  batch_size: "@batch_size"
+  collate_fn: "$monai.data.utils.no_collation"
+  num_workers: "@train_workers"
+
+plan_val_loader:
+  _target_: DataLoader
+  dataset: "@plan_val_dataset"
+  batch_size: "@batch_size"
+  collate_fn: "$monai.data.utils.no_collation"
+  num_workers: "@val_workers"

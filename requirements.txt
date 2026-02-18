@@ -1,0 +1,6 @@
+monai
+torch
+fire
+protobuf==3.20
+einops
+pytorch-ignite

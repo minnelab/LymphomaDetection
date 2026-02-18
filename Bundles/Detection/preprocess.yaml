@@ -1,0 +1,5 @@
+preprocess_datasets:
+ training: "@data_list"
+
+preprocess:
+- "$preprocess(preprocess_datasets=@preprocess_datasets, preprocess_transform=@preprocess_transform, modality_conf=@modality_conf, box_key=@box_key, label_key=@label_key, instance_segmentation_key=@instance_seg_key, preprocess_file_path=@preprocess_file_path, save_preprocess_transforms=@save_preprocess_transforms, preprocess_dir=@preprocess_dir)"

@@ -1,0 +1,2 @@
+plan:
+- "$run_planning([@plan_train_loader,@plan_val_loader],@modality_conf, @image_modalities, @plan_filename)"

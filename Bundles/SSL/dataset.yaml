@@ -1,0 +1,29 @@
+data_list: "$monai.data.load_decathlon_datalist(data_list_file_path=@decathlon_data_list, base_dir=@data_dir)"
+image_data_list: "$create_image_list(datalist=@data_list)"
+partitioned_dataset: "$monai.data.utils.partition_dataset(data=@image_data_list, ratios=[0.8, 0.2], shuffle=True)"
+
+data: "$monai.data.utils.partition_dataset(data=@image_data_list, ratios=[0.8, 0.2], shuffle=True)"
+
+train_ds:
+  _target_: Dataset
+  data: "$@data[0]"
+  transform: "@train_transforms"
+
+val_ds:
+  _target_: Dataset
+  data: "$@data[1]"
+  transform: "@train_transforms"
+
+train_loader:
+  _target_: DataLoader
+  dataset: "@train_ds"
+  batch_size: "@batch_size"
+  shuffle: true
+  num_workers: 4
+
+val_loader:
+  _target_: DataLoader
+  dataset: "@val_ds"
+  batch_size: "@batch_size"
+  shuffle: false
+  num_workers: 4

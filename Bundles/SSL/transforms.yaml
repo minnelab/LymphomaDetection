@@ -1,0 +1,86 @@
+train_transforms:
+  _target_: Compose
+  transforms:
+  - _target_: LoadImaged
+    keys:
+    - image
+  - _target_: EnsureChannelFirstd
+    keys:
+    - image
+  - _target_: CropForegroundd
+    keys:
+    - image
+    source_key: image
+    channel_indices:
+    - 0
+    select_fn: "$threshold_CT"
+  - _target_: SpatialPadd
+    keys:
+    - image
+    spatial_size: "@patch_size"
+  - _target_: RandSpatialCropSamplesd
+    keys:
+    - image
+    roi_size: "@patch_size"
+    random_size: false
+    num_samples: 2
+  - _target_: CopyItemsd
+    keys:
+    - image
+    times: 2
+    names:
+    - gt_image
+    - image_2
+    allow_missing_keys: false
+  - _target_: OneOf
+    transforms:
+    - _target_: RandCoarseDropoutd
+      keys:
+      - image
+      prob: 1.0
+      holes: 6
+      spatial_size: 5
+      dropout_holes: true
+      max_spatial_size: 32
+      fill_value: "@fill_value"
+    - _target_: RandCoarseDropoutd
+      keys:
+      - image
+      prob: 1.0
+      holes: 6
+      spatial_size: 20
+      dropout_holes: false
+      max_spatial_size: 64
+      fill_value: "@fill_value"
+  - _target_: RandCoarseShuffled
+    keys:
+    - image
+    prob: 0.8
+    holes: 10
+    spatial_size: 8
+  - _target_: OneOf
+    transforms:
+    - _target_: RandCoarseDropoutd
+      keys:
+      - image_2
+      prob: 1.0
+      holes: 6
+      spatial_size: 5
+      dropout_holes: true
+      max_spatial_size: 32
+      fill_value: "@fill_value"
+    - _target_: RandCoarseDropoutd
+      keys:
+      - image_2
+      prob: 1.0
+      holes: 6
+      spatial_size: 20
+      dropout_holes: false
+      max_spatial_size: 64
+      fill_value: "@fill_value"
+  - _target_: RandCoarseShuffled
+    keys:
+    - image_2
+    prob: 0.8
+    holes: 10
+    spatial_size: 8

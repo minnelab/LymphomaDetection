@@ -1,0 +1,7 @@
+recon_loss: "$torch.nn.L1Loss()"
+contrastive_loss: "$monai.losses.ContrastiveLoss(temperature=0.05)"
+
+total_loss:
+  _target_: "$TotalLoss"
+  recon_loss: "@recon_loss"
+  contrastive_loss: "@contrastive_loss"

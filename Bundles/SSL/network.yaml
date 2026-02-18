@@ -1,0 +1,30 @@
+device: "$torch.device('cuda:0')"
+
+model: 
+  _target_: "$SwinAutoEnc"
+  in_chans: "@in_channels"
+  out_channels: "@out_channels"
+  embed_dim: "@embed_dim"
+  window_size:
+    - 4
+    - 4
+    - 4
+  patch_size:
+    - 2
+    - 2
+    - 2
+  depths:
+    - 2
+    - 2
+    - 6
+    - 2
+  num_heads:
+    - 3
+    - 6
+    - 12
+    - 24
+
+optimizer:
+  _target_: "$torch.optim.Adam"
+  params: "$@model.parameters()"
+  lr: "@lr"
